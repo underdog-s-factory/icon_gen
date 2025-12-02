@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Icon Gen | 极简图标生成器</title>
+  <style>
+    :root {
+      --bg-color: #fdfdfd;
+      --card-bg: #ffffff;
+      --text-main: #111111;
+      --text-sub: #666666;
+      --accent-color: #111111;
+      --accent-hover: #333333;
+      --border-color: #eaeaea;
+      --error-color: #ef4444;
+      --success-color: #10b981;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+      --shadow-lg: 0 20px 40px rgba(0,0,0,0.06);
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      line-height: 1.6;
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 720px;
+      animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #000 0%, #444 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--text-sub);
+      font-size: 1.1rem;
+      font-weight: 400;
+    }
+
+    /* Card Style */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(0,0,0,0.02);
+      margin-bottom: 32px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Upload Section */
+    .upload-area {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 60px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      background: #fafafa;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-area:hover {
+      border-color: var(--accent-color);
+      background: #fefefe;
+      transform: translateY(-2px);
+    }
+
+    .upload-area.dragover {
+      border-color: var(--accent-color);
+      background: #f5f5f5;
+      transform: scale(0.99);
+    }
+
+    .upload-icon {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: var(--text-sub);
+      transition: color 0.3s;
+    }
+
+    .upload-area:hover .upload-icon {
+      color: var(--accent-color);
+    }
+
+    .upload-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .upload-desc {
+      color: #999;
+      font-size: 0.9rem;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+      border: none;
+      outline: none;
+    }
+
+    .btn-primary {
+      background: var(--accent-color);
+      color: white;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-sub);
+      border: 1px solid var(--border-color);
+      margin-top: 16px;
+      width: 100%;
+      font-size: 0.95rem;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+      background: #fff;
+    }
+
+    /* Preview Section */
+    .preview-section {
+      text-align: center;
+      animation: slideUp 0.4s ease-out;
+    }
+
+    .preview-wrapper {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 24px;
+      padding: 10px;
+      background: white;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+    }
+
+    #previewImage {
+      max-width: 180px;
+      max-height: 180px;
+      border-radius: 12px;
+      display: block;
+    }
+
+    .remove-btn {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: white;
+      color: var(--error-color);
+      border: 1px solid rgba(0,0,0,0.1);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: all 0.2s;
+    }
+
+    .remove-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* Platform Selection */
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .section-title::before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 16px;
+      background: var(--accent-color);
+      border-radius: 2px;
+    }
+
+    .platform-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .platform-option input {
+      display: none;
+    }
+
+    .platform-card {
+      background: #f8f9fa;
+      border: 2px solid transparent;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .platform-option:hover .platform-card {
+      background: #f0f0f0;
+    }
+
+    .platform-option input:checked + .platform-card {
+      border-color: var(--accent-color);
+      background: white;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    
+    .platform-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .platform-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: block;
+    }
+    
+    .platform-desc {
+      font-size: 0.75rem;
+      color: #999;
+      margin-top: 4px;
+      display: block;
+    }
+
+    /* Progress */
+    .progress-container {
+      margin-top: 24px;
+      background: #f0f0f0;
+      border-radius: 100px;
+      height: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--accent-color);
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 100px;
+    }
+    
+    .progress-info {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      margin-top: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Toast Messages */
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 12px 24px;
+      border-radius: 50px;
+      background: white;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      font-size: 0.9rem;
+      font-weight: 500;
+      animation: slideDown 0.3s cubic-bezier(0.2, 0, 0, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(0,0,0,0.05);
+      pointer-events: auto;
+    }
+    
+    .toast.error { color: var(--error-color); }
+    .toast.success { color: var(--success-color); }
+
+    /* Footer */
+    footer {
+      margin-top: 40px;
+      color: #aaa;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 2.2rem; }
+      .card { padding: 24px; }
+      .upload-area { padding: 40px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toast-container" id="messageContainer"></div>
+
+  <div class="main-container">
+    <header>
+      <h1>Icon Gen</h1>
+      <p class="subtitle">优雅的多平台图标生成工具</p>
+    </header>
+
+    <main>
+      <!-- Card 1: Upload -->
+      <div class="card" id="uploadSection">
+        <div class="upload-area" id="uploadArea">
+          <div class="upload-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <h3 class="upload-title">点击或拖拽图片至此</h3>
+          <p class="upload-desc">支持 PNG, JPG, GIF, WebP (Max 10MB)</p>
+          <input type="file" id="fileInput" accept="image/*" hidden>
+        </div>
+        <button class="btn btn-secondary" id="pasteBtn">
+          从剪贴板粘贴
+        </button>
+      </div>
+
+      <!-- Card 2: Settings & Preview (Hidden initially) -->
+      <div class="card preview-section" id="workspaceSection" style="display: none;">
+        
+        <!-- Preview -->
+        <div class="preview-wrapper">
+          <img id="previewImage" alt="预览">
+          <button class="remove-btn" id="removeBtn" title="移除">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <!-- Platform Selection -->
+        <h3 class="section-title">选择目标平台</h3>
+        <div class="platform-grid">
+          <label class="platform-option">
+            <input type="radio" name="platform" value="chrome" checked>
+            <div class="platform-card">
+              <span class="platform-icon">🌐</span>
+              <span class="platform-name">Chrome</span>
+              <span class="platform-desc">Extension</span>
+            </div>
+          </label>
+          
+          <label class="platform-option">
+            <input type="radio" name="platform" value="ios">
+            <div class="platform-card">
+              <span class="platform-icon">🍎</span>
+              <span class="platform-name">iOS</span>
+              <span class="platform-desc">App Icon</span>
+            </div>
+          </label>
+          
+          <label class="platform-option">
+            <input type="radio" name="platform" value="android">
+            <div class="platform-card">
+              <span class="platform-icon">🤖</span>
+              <span class="platform-name">Android</span>
+              <span class="platform-desc">App Icon</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- Action -->
+        <button class="btn btn-primary" id="generateBtn">
+          <span class="btn-text">开始生成</span>
+        </button>
+
+        <!-- Progress -->
+        <div id="progressWrapper" style="display: none;">
+          <div class="progress-container">
+            <div class="progress-bar" id="progressFill"></div>
+          </div>
+          <div class="progress-info" id="progressText">0%</div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <footer>
+      <p>Privacy First · Local Processing · No Server Upload</p>
+    </footer>
+  </div>
+
+  <!-- External Dependency -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- Embedded JS Modules -->
+  <script>
+    /**
+     * MODULE: Icon Sizes
+     */
+    const ICON_SIZES = {
+      chrome: [
+        { size: 16, name: 'icon16.png', description: 'favicon, 工具栏' },
+        { size: 32, name: 'icon32.png', description: 'Windows 任务栏' },
+        { size: 48, name: 'icon48.png', description: '扩展管理页面' },
+        { size: 128, name: 'icon128.png', description: 'Chrome 网上应用店' }
+      ],
+      ios: [
+        { size: 20, name: 'Icon-20.png', description: 'Notification iOS 1x' },
+        { size: 40, name: 'Icon-20@2x.png', description: 'Notification iOS 2x' },
+        { size: 60, name: 'Icon-20@3x.png', description: 'Notification iOS 3x' },
+        { size: 29, name: 'Icon-29.png', description: 'Settings iOS 1x' },
+        { size: 58, name: 'Icon-29@2x.png', description: 'Settings iOS 2x' },
+        { size: 87, name: 'Icon-29@3x.png', description: 'Settings iOS 3x' },
+        { size: 40, name: 'Icon-40@2x.png', description: 'Spotlight iOS 2x' },
+        { size: 80, name: 'Icon-40@3x.png', description: 'Spotlight iOS 3x' },
+        { size: 120, name: 'Icon-60@2x.png', description: 'App Icon iPhone 2x' },
+        { size: 180, name: 'Icon-60@3x.png', description: 'App Icon iPhone 3x' },
+        { size: 76, name: 'Icon-76.png', description: 'App Icon iPad 1x' },
+        { size: 152, name: 'Icon-76@2x.png', description: 'App Icon iPad 2x' },
+        { size: 167, name: 'Icon-83.5@2x.png', description: 'App Icon iPad Pro' },
+        { size: 1024, name: 'Icon-1024.png', description: 'App Store' }
+      ],
+      android: [
+        { size: 48, density: 'mdpi', name: 'mipmap-mdpi/ic_launcher.png', description: '基准密度 (1x)' },
+        { size: 72, density: 'hdpi', name: 'mipmap-hdpi/ic_launcher.png', description: '高密度 (1.5x)' },
+        { size: 96, density: 'xhdpi', name: 'mipmap-xhdpi/ic_launcher.png', description: '超高密度 (2x)' },
+        { size: 144, density: 'xxhdpi', name: 'mipmap-xxhdpi/ic_launcher.png', description: '超超高密度 (3x)' },
+        { size: 192, density: 'xxxhdpi', name: 'mipmap-xxxhdpi/ic_launcher.png', description: '超超超高密度 (4x)' },
+        { size: 512, name: 'playstore-icon.png', description: 'Play Store 应用商店' }
+      ]
+    };
+    window.ICON_SIZES = ICON_SIZES;
+
+    /**
+     * MODULE: Canvas Processor
+     */
+    const IconProcessor = {
+      resizeImage(image, size) {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(image, 0, 0, size, size);
+        return canvas.toDataURL('image/png');
+      },
+
+      loadImage(source) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            if (typeof source !== 'string') URL.revokeObjectURL(img.src);
+            resolve(img);
+          };
+          img.onerror = () => reject(new Error('图像加载失败'));
+          if (typeof source === 'string') {
+            img.src = source;
+          } else {
+            img.src = URL.createObjectURL(source);
+          }
+        });
+      },
+
+      async generateIcons(imageSource, platform, progressCallback) {
+        if (!window.ICON_SIZES || !window.ICON_SIZES[platform]) {
+          throw new Error(`不支持的平台: ${platform}`);
+        }
+        const img = await this.loadImage(imageSource);
+        const sizes = window.ICON_SIZES[platform];
+        const total = sizes.length;
+        const icons = [];
+        
+        for (let i = 0; i < total; i++) {
+          const sizeInfo = sizes[i];
+          if (progressCallback) progressCallback(i + 1, total);
+          const resizedDataUrl = this.resizeImage(img, sizeInfo.size);
+          icons.push({
+            name: sizeInfo.name,
+            data: resizedDataUrl,
+            size: sizeInfo.size,
+            description: sizeInfo.description || ''
+          });
+        }
+        return icons;
+      },
+
+      async pasteImageFromClipboard() {
+        try {
+          const clipboardItems = await navigator.clipboard.read();
+          for (const item of clipboardItems) {
+            for (const type of item.types) {
+              if (type.startsWith('image/')) {
+                const blob = await item.getType(type);
+                return new File([blob], 'pasted-image.png', { type: 'image/png' });
+              }
+            }
+          }
+          throw new Error('剪贴板中没有图像');
+        } catch (error) {
+          throw new Error('无法访问剪贴板: ' + error.message);
+        }
+      }
+    };
+    window.IconProcessor = IconProcessor;
+
+    /**
+     * MODULE: Utils
+     */
+    const IconUtils = {
+      async createZipPackage(icons, platform) {
+        if (typeof JSZip === 'undefined') throw new Error('JSZip库未加载');
+        const zip = new JSZip();
+        const folder = zip.folder(platform + '-icons');
+        icons.forEach(icon => {
+          const base64Data = icon.data.split(',')[1];
+          folder.file(icon.name, base64Data, { base64: true });
+        });
+        return await zip.generateAsync({
+          type: 'blob',
+          compression: 'DEFLATE',
+          compressionOptions: { level: 9 }
+        });
+      },
+
+      downloadFile(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+      },
+
+      formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+      },
+
+      validateImageFile(file) {
+        const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+        if (!validTypes.includes(file.type)) return false;
+        if (file.size > 10 * 1024 * 1024) return false;
+        return true;
+      },
+
+      showMessage(message, container, type = 'success') {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `toast ${type}`;
+        msgDiv.innerHTML = type === 'success' 
+          ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' + message
+          : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' + message;
+        
+        container.appendChild(msgDiv);
+        setTimeout(() => {
+          msgDiv.style.opacity = '0';
+          msgDiv.style.transform = 'translateY(-10px)';
+          setTimeout(() => {
+             if(msgDiv.parentNode) msgDiv.parentNode.removeChild(msgDiv);
+          }, 300);
+        }, 3000);
+      },
+
+      showError(message, container) {
+        this.showMessage(message, container, 'error');
+      },
+
+      showSuccess(message, container) {
+        this.showMessage(message, container, 'success');
+      }
+    };
+    window.IconUtils = IconUtils;
+  </script>
+
+  <!-- Main Logic -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // State
+      let currentImageFile = null;
+      let currentPlatform = 'chrome';
+
+      // Elements
+      const uploadArea = document.getElementById('uploadArea');
+      const fileInput = document.getElementById('fileInput');
+      const pasteBtn = document.getElementById('pasteBtn');
+      const workspaceSection = document.getElementById('workspaceSection');
+      const previewImage = document.getElementById('previewImage');
+      const removeBtn = document.getElementById('removeBtn');
+      const generateBtn = document.getElementById('generateBtn');
+      const progressWrapper = document.getElementById('progressWrapper');
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+      const messageContainer = document.getElementById('messageContainer');
+
+      // --- Event Listeners ---
+
+      // Upload
+      uploadArea.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', handleFileSelect);
+      
+      // Drag & Drop
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      });
+      uploadArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+      });
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) processImageFile(file);
+      });
+
+      // Paste
+      pasteBtn.addEventListener('click', async () => {
+        try {
+          const file = await window.IconProcessor.pasteImageFromClipboard();
+          processImageFile(file);
+        } catch (error) {
+          window.IconUtils.showError(error.message, messageContainer);
+        }
+      });
+
+      // Remove
+      removeBtn.addEventListener('click', () => {
+        currentImageFile = null;
+        workspaceSection.style.display = 'none';
+        fileInput.value = '';
+        progressWrapper.style.display = 'none';
+      });
+
+      // Platform Change
+      document.querySelectorAll('input[name="platform"]').forEach(radio => {
+        radio.addEventListener('change', (e) => currentPlatform = e.target.value);
+      });
+
+      // Generate
+      generateBtn.addEventListener('click', handleGenerate);
+
+      // --- Functions ---
+
+      function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) processImageFile(file);
+      }
+
+      function processImageFile(file) {
+        if (!window.IconUtils.validateImageFile(file)) {
+          window.IconUtils.showError('无效的图片文件或文件过大（最大10MB）', messageContainer);
+          return;
+        }
+        currentImageFile = file;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previewImage.src = e.target.result;
+          workspaceSection.style.display = 'block';
+          // Scroll to workspace if needed (optional)
+        };
+        reader.readAsDataURL(file);
+      }
+
+      async function handleGenerate() {
+        if (!currentImageFile) return;
+
+        try {
+          // UI State: Processing
+          generateBtn.disabled = true;
+          generateBtn.querySelector('.btn-text').textContent = '生成中...';
+          progressWrapper.style.display = 'block';
+          updateProgress(0, 0);
+
+          // Generate
+          const icons = await window.IconProcessor.generateIcons(
+            currentImageFile,
+            currentPlatform,
+            updateProgress
+          );
+
+          // Zip
+          updateProgress(icons.length, icons.length);
+          progressText.textContent = '正在打包...';
+          const zipBlob = await window.IconUtils.createZipPackage(icons, currentPlatform);
+
+          // Download
+          const filename = `${currentPlatform}-icons-${Date.now()}.zip`;
+          window.IconUtils.downloadFile(zipBlob, filename);
+
+          // Success
+          window.IconUtils.showSuccess(
+            `成功! 文件大小: ${window.IconUtils.formatFileSize(zipBlob.size)}`,
+            messageContainer
+          );
+
+          // Reset UI
+          setTimeout(() => {
+            progressWrapper.style.display = 'none';
+            generateBtn.disabled = false;
+            generateBtn.querySelector('.btn-text').textContent = '开始生成';
+          }, 2000);
+
+        } catch (error) {
+          console.error(error);
+          window.IconUtils.showError('出错: ' + error.message, messageContainer);
+          generateBtn.disabled = false;
+          generateBtn.querySelector('.btn-text').textContent = '开始生成';
+        }
+      }
+
+      function updateProgress(current, total) {
+        if (total === 0) {
+          progressFill.style.width = '0%';
+          progressText.textContent = '0%';
+          return;
+        }
+        const percentage = Math.round((current / total) * 100);
+        progressFill.style.width = percentage + '%';
+        progressText.textContent = percentage + '%';
+      }
+    });
+  </script>
+</body>
+</html>

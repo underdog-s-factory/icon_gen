@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Icon生成工具箱",
+  "version": "1.0.0",
+  "description": "一键生成多平台图标包 - 支持Chrome、iOS、Android平台",
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
+    },
+    "default_title": "Icon生成工具箱"
+  },
+  "permissions": []
+}

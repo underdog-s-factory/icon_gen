@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Icon Gen | 极简图标生成器</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
   <style>
     :root {
       --bg-color: #fdfdfd;
@@ -199,10 +200,16 @@
     }
 
     #previewImage {
-      max-width: 180px;
-      max-height: 180px;
-      border-radius: 12px;
       display: block;
+      max-width: 100%;
+    }
+
+    .img-container {
+      max-width: 400px;
+      max-height: 400px;
+      margin: 0 auto;
+      border-radius: 12px;
+      overflow: hidden;
     }
 
     .remove-btn {
@@ -401,7 +408,8 @@
       <div class="card" id="uploadSection">
         <div class="upload-area" id="uploadArea">
           <div class="upload-icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <svg width="48" height="48" t="1764658279062" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2736" width="128" height="128"><path d="M857.6 956.8H166.4c-54.4 0-102.4-48-102.4-105.6v-182.4c0-19.2 12.8-32 32-32s32 12.8 32 32v182.4c0 22.4 16 41.6 38.4 41.6h694.4c19.2 0 38.4-19.2 38.4-41.6v-182.4c0-19.2 12.8-32 32-32s32 12.8 32 32v182.4c-3.2 57.6-48 105.6-105.6 105.6z" fill="#666666" p-id="2737"></path><path d="M512 764.8c-19.2 0-32-12.8-32-32v-640c0-19.2 12.8-32 32-32s32 12.8 32 32v640c0 19.2-12.8 32-32 32z" fill="#666666" p-id="2738"></path><path d="M720 326.4c-9.6 0-16-3.2-22.4-9.6L512 131.2l-185.6 185.6c-12.8 12.8-32 12.8-44.8 0s-12.8-32 0-44.8L489.6 64c12.8-12.8 32-12.8 44.8 0l208 208c12.8 12.8 12.8 32 0 44.8-6.4 6.4-12.8 9.6-22.4 9.6z" fill="#666666" p-id="2739"></path></svg>
+            <!-- <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> -->
           </div>
           <h3 class="upload-title">点击或拖拽图片至此</h3>
           <p class="upload-desc">支持 PNG, JPG, GIF, WebP (Max 10MB)</p>
@@ -417,7 +425,9 @@
         
         <!-- Preview -->
         <div class="preview-wrapper">
-          <img id="previewImage" alt="预览">
+          <div class="img-container">
+            <img id="previewImage" alt="预览">
+          </div>
           <button class="remove-btn" id="removeBtn" title="移除">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
@@ -478,6 +488,7 @@
 
   <!-- External Dependency -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
   <!-- Embedded JS Modules -->
   <script>
@@ -670,8 +681,10 @@
       // State
       let currentImageFile = null;
       let currentPlatform = 'chrome';
+      let cropper = null;
 
       // Elements
+      const uploadSection = document.getElementById('uploadSection');
       const uploadArea = document.getElementById('uploadArea');
       const fileInput = document.getElementById('fileInput');
       const pasteBtn = document.getElementById('pasteBtn');
@@ -719,7 +732,12 @@
       // Remove
       removeBtn.addEventListener('click', () => {
         currentImageFile = null;
+        if (cropper) {
+          cropper.destroy();
+          cropper = null;
+        }
         workspaceSection.style.display = 'none';
+        uploadSection.style.display = 'block';
         fileInput.value = '';
         progressWrapper.style.display = 'none';
       });
@@ -749,8 +767,22 @@
         const reader = new FileReader();
         reader.onload = (e) => {
           previewImage.src = e.target.result;
+          
+          // Hide upload section, show workspace
+          uploadSection.style.display = 'none';
           workspaceSection.style.display = 'block';
-          // Scroll to workspace if needed (optional)
+          
+          if (cropper) {
+            cropper.destroy();
+          }
+          
+          cropper = new Cropper(previewImage, {
+            aspectRatio: 1,
+            viewMode: 1,
+            autoCropArea: 1,
+            minContainerWidth: 300,
+            minContainerHeight: 300
+          });
         };
         reader.readAsDataURL(file);
       }
@@ -765,9 +797,19 @@
           progressWrapper.style.display = 'block';
           updateProgress(0, 0);
 
+          // Get cropped image
+          let sourceImage = currentImageFile;
+          if (cropper) {
+             const canvas = cropper.getCroppedCanvas({
+                width: 1024,
+                height: 1024
+             });
+             sourceImage = canvas.toDataURL('image/png');
+          }
+
           // Generate
           const icons = await window.IconProcessor.generateIcons(
-            currentImageFile,
+            sourceImage,
             currentPlatform,
             updateProgress
           );

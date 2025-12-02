@@ -136,26 +136,29 @@ header h1 {
 }
 
 .preview-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 16px;
   padding: 12px;
   background: #f8f9fa;
   border-radius: var(--radius-md);
   border: 1px solid rgba(0,0,0,0.04);
+  margin-bottom: 12px;
+}
+
+.img-container {
+  max-height: 300px;
+  overflow: hidden;
+  border-radius: 8px;
 }
 
 #previewImage {
-  width: 56px;
-  height: 56px;
-  border-radius: 10px;
-  object-fit: cover;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  display: block;
+  max-width: 100%;
 }
 
 .file-info {
-  flex: 1;
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 .filename {

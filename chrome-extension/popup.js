@@ -6,6 +6,7 @@
 // 全局变量
 let currentImageFile = null;
 let currentPlatform = 'chrome';
+let cropper = null;
 
 // DOM元素
 const uploadSection = document.getElementById('uploadSection');
@@ -99,10 +100,13 @@ async function handlePaste() {
     showMessage(error.message, 'error');
   }
 }
-
 // 处理重新上传
 function handleReupload() {
   currentImageFile = null;
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
   fileInput.value = '';
   
   // 切换显示区域
@@ -151,9 +155,19 @@ async function handleGenerate() {
     progressContainer.style.display = 'block';
     updateProgress(0, 0);
 
+    // 获取裁剪后的图片
+    let sourceImage = currentImageFile;
+    if (cropper) {
+      const canvas = cropper.getCroppedCanvas({
+        width: 1024,
+        height: 1024
+      });
+      sourceImage = canvas.toDataURL('image/png');
+    }
+
     // 生成图标
     const icons = await window.IconProcessor.generateIcons(
-      currentImageFile,
+      sourceImage,
       currentPlatform,
       updateProgress
     );
@@ -225,6 +239,18 @@ function processImageFile(file) {
     // 切换显示区域：隐藏上传区，显示工作区
     uploadSection.style.display = 'none';
     workspaceSection.style.display = 'block';
+
+    if (cropper) {
+      cropper.destroy();
+    }
+
+    cropper = new Cropper(previewImage, {
+      aspectRatio: 1,
+      viewMode: 1,
+      autoCropArea: 1,
+      minContainerWidth: 300,
+      minContainerHeight: 300
+    });
   };
   reader.readAsDataURL(file);
 }

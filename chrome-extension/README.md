@@ -6,6 +6,7 @@
 
 - ✅ 支持 Chrome Extension、iOS App、Android App 三大平台
 - ✅ 一键生成所有所需尺寸的图标
+- ✅ 内置 Cropper.js 图片裁剪功能
 - ✅ 支持拖拽上传、文件选择、剪贴板粘贴
 - ✅ 纯前端处理，无需后端服务器
 - ✅ 自动打包为 ZIP 文件下载
@@ -26,9 +27,10 @@
 
 1. 点击浏览器工具栏中的插件图标
 2. 上传或粘贴一张图片（建议使用 1024x1024 的正方形图片）
-3. 选择目标平台（Chrome/iOS/Android）
-4. 点击"生成图标包"按钮
-5. 自动下载包含所有尺寸图标的 ZIP 文件
+3. 在预览区调整裁剪框
+4. 选择目标平台（Chrome/iOS/Android）
+5. 点击"生成图标包"按钮
+6. 自动下载包含所有尺寸图标的 ZIP 文件
 
 ## 支持的图标尺寸
 
@@ -75,13 +77,16 @@ chrome-extension/
 │   ├── canvas-processor.js # Canvas 图像处理
 │   └── utils.js          # 工具函数
 └── lib/                  # 第三方库（本地）
-    └── jszip.min.js      # ZIP 打包库
+    ├── jszip.min.js      # ZIP 打包库
+    ├── cropper.min.js    # 图片裁剪库
+    └── cropper.min.css   # 裁剪库样式
 ```
 
 ### 核心技术
 
 - **HTML5 Canvas API** - 图像缩放和处理
 - **JSZip** - ZIP 文件打包（本地版本）
+- **Cropper.js** - 图片裁剪库（本地版本）
 - **FileReader API** - 文件读取
 - **Clipboard API** - 剪贴板访问
 
@@ -91,6 +96,8 @@ chrome-extension/
 
 所有依赖库已下载到本地 `lib/` 目录：
 - `jszip.min.js` (v3.10.1) - 从 CDN 下载的本地副本
+- `cropper.min.js` (v1.5.13) - 图片裁剪库
+- `cropper.min.css` (v1.5.13) - 裁剪库样式
 
 ### 核心模块
 

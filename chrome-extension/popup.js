@@ -24,7 +24,10 @@ const progressText = document.getElementById('progressText');
 const messageContainer = document.getElementById('messageContainer');
 
 // 初始化
-function init() {
+async function init() {
+  // Initialize i18n first
+  await window.I18n.init();
+  
   setupEventListeners();
   updatePlatformSelection();
 }
@@ -97,7 +100,7 @@ async function handlePaste() {
     const file = await window.IconProcessor.pasteImageFromClipboard();
     processImageFile(file);
   } catch (error) {
-    showMessage(error.message, 'error');
+    showMessage(window.I18n.t('paste_error') + ': ' + error.message, 'error');
   }
 }
 // 处理重新上传
@@ -142,14 +145,14 @@ function showMessage(message, type = 'success') {
 // 处理生成
 async function handleGenerate() {
   if (!currentImageFile) {
-    showMessage('请先上传图片', 'error');
+    showMessage(window.I18n.t('invalid_file'), 'error');
     return;
   }
 
   try {
     // 禁用按钮
     generateBtn.disabled = true;
-    generateBtn.textContent = '⏳ 生成中...';
+    generateBtn.textContent = '⏳ ' + window.I18n.t('generating');
 
     // 显示进度条
     progressContainer.style.display = 'block';
@@ -174,7 +177,7 @@ async function handleGenerate() {
 
     // 创建ZIP包
     updateProgress(icons.length, icons.length);
-    progressText.textContent = '正在打包...';
+    progressText.textContent = window.I18n.t('packing');
 
     const zipBlob = await window.IconUtils.createZipPackage(icons, currentPlatform);
 
@@ -184,7 +187,7 @@ async function handleGenerate() {
 
     // 显示成功消息
     showMessage(
-      `成功生成 ${icons.length} 个图标！文件大小: ${window.IconUtils.formatFileSize(zipBlob.size)}`,
+      window.I18n.t('success', window.IconUtils.formatFileSize(zipBlob.size)),
       'success'
     );
 
@@ -192,17 +195,17 @@ async function handleGenerate() {
     setTimeout(() => {
       progressContainer.style.display = 'none';
       generateBtn.disabled = false;
-      generateBtn.textContent = '🚀 开始生成';
+      generateBtn.textContent = '🚀 ' + window.I18n.t('generate');
     }, 1000);
 
   } catch (error) {
     console.error('生成失败:', error);
-    showMessage('生成失败: ' + error.message, 'error');
+    showMessage(window.I18n.t('paste_error') + ': ' + error.message, 'error');
 
     // 重置UI
     progressContainer.style.display = 'none';
     generateBtn.disabled = false;
-    generateBtn.textContent = '🚀 开始生成';
+    generateBtn.textContent = '🚀 ' + window.I18n.t('generate');
   }
 }
 
@@ -223,7 +226,7 @@ function updateProgress(current, total) {
 function processImageFile(file) {
   // 验证文件
   if (!window.IconUtils.validateImageFile(file)) {
-    showMessage('无效的图片文件或文件过大（最大10MB）', 'error');
+    showMessage(window.I18n.t('invalid_file'), 'error');
     return;
   }
 

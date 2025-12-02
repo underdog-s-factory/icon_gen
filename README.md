@@ -89,7 +89,7 @@ npx http-server -p 8000
 - ✅ 快速访问，无需打开新页面
 - ✅ 支持剪贴板粘贴功能
 
-### 方式三：油猴脚本版本（暂不可用）
+### ~~方式二：Chrome 扩展程序版本（推荐使用）~~
 
 **适用场景**：在任意网页使用，无需打开额外页面
 
@@ -266,3 +266,274 @@ MIT License
 ## 📧 联系方式
 
 如有问题或建议，请提交 Issue。
+
+
+
+# Icon Generator Toolbox
+
+A pure front-end based multi-platform icon generator that supports one-click generation of complete icon packages required for Chrome Extensions, iOS Apps, and Android Apps.
+
+## ✨ Features
+
+- 🎨 **Pure Frontend Implementation** - Based on HTML5 Canvas, no backend support required
+- 🚀 **One-Click Generation** - Automatically generates icons in multiple sizes
+- 📦 **ZIP Packaging** - Automatically packages and downloads while maintaining directory structure
+- 🔄 **Multi-Platform Support** - Chrome Extension, iOS App, Android App
+- ✂️ **Image Cropping** - Integrated with Cropper.js for online cropping after upload
+- 📋 **Clipboard Support** - Supports pasting images directly from the clipboard
+- 🎯 **Drag & Drop Upload** - Supports dragging and dropping image files for upload
+- 💡 **Modular Design** - Core logic can be reused in Tampermonkey scripts and Chrome extensions
+
+## 📁 Project Structure
+
+```
+icon-generator-toolbox/
+├── website/                   # Static website version
+│   ├── index.html            # Main page
+├── tampermonkey/              # Tampermonkey script version
+│   └── icon-gen.user.js      # Tampermonkey script main file
+├── chrome-extension/          # Chrome extension version
+│   ├── manifest.json         # Manifest V3 configuration
+│   ├── popup.html            # Popup interface
+│   ├── popup.css             # Popup styles
+│   ├── popup.js              # Popup logic
+│   ├── assets/               # Extension icons
+│   ├── core/                 # Core logic (reusable)
+│   └── lib/                  # Local dependency libraries
+└── README.md                  # Project documentation
+```
+
+## 🚀 Quick Start
+
+This project provides multiple usage methods to meet different scenario needs:
+
+### Method 1: Static Website Version
+
+**Use Case**: Local use, internal team deployment
+
+1. Clone or download this project
+2. Open `website/index.html` directly in your browser
+3. Upload or paste an image
+4. Crop the image (supports zooming and moving)
+5. Select target platform (Chrome/iOS/Android)
+6. Click the "Generate Icon Package" button
+7. Automatically download the ZIP file
+
+**Local Server Run** (Optional):
+
+```bash
+# Using Python 3
+cd icon-generator-toolbox
+python -m http.server 8000
+
+# Using Node.js (requires installing http-server)
+npx http-server -p 8000
+
+# Then visit http://localhost:8000/website/
+```
+
+### Method 2: Chrome Extension Version
+
+**Use Case**: Chrome browser users who want quick access
+
+**Installation Steps**:
+
+1. Open Chrome browser
+2. Visit `chrome://extensions/`
+3. Enable "Developer mode" in the top right corner
+4. Click "Load unpacked"
+5. Select the `chrome-extension` folder
+6. Installation complete!
+
+**Usage**:
+
+1. Click the extension icon in the browser toolbar
+2. Upload or paste an image in the popup window (recommended 1024x1024)
+3. Crop the image (freely adjust the cropping area)
+4. Select target platform (Chrome/iOS/Android)
+5. Click the "Generate Icon Package" button
+6. Automatically download the ZIP file containing all sizes
+
+**Features**:
+- ✅ Fully compliant with Manifest V3 specification
+- ✅ All dependency libraries are localized, no remote loading
+- ✅ Quick access without opening a new page
+- ✅ Supports clipboard paste functionality
+
+### Method 3: ~~Tampermonkey Script Version (Currently Unavailable)~~
+
+**Use Case**: Use on any webpage without opening an additional page
+
+**Note**: This version currently has compatibility issues and is temporarily unavailable.
+
+**Installation Steps**:
+
+1. Install Tampermonkey extension
+   - [Chrome Version](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
+   - [Firefox Version](https://addons.mozilla.org/firefox/addon/tampermonkey/)
+   - [Edge Version](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd)
+
+2. Install Script
+   - Open `tampermonkey/icon-gen.user.js` file
+   - Copy all content
+   - Click "Add New Script" in Tampermonkey extension
+   - Paste the code and save
+
+**Usage**:
+
+1. On any webpage, click the Tampermonkey icon
+2. Select "Open Icon Generator" menu item
+3. Upload or paste an image in the popup interface
+4. Crop the image
+5. Select target platform
+6. Click the "Generate Icon Package" button
+7. Automatically download the ZIP file
+
+**Features**:
+- ✅ Can be used on any webpage
+- ✅ Quickly invoked via right-click menu
+- ✅ Supports drag & drop, paste, and file selection
+- ✅ Complete progress display
+
+## 📱 Supported Platforms
+
+### Chrome Extension
+Generates 4 sizes:
+- 16x16 (favicon, toolbar)
+- 32x32 (Windows taskbar)
+- 48x48 (extension management page)
+- 128x128 (Chrome Web Store)
+
+### iOS App
+Generates 14 sizes:
+- Notification icons (20-60px)
+- Settings icons (29-87px)
+- Spotlight icons (40-80px)
+- App icons (120-180px)
+- iPad icons (76-167px)
+- App Store (1024x1024)
+
+### Android App
+Generates 6 sizes:
+- mdpi (48x48)
+- hdpi (72x72)
+- xhdpi (96x96)
+- xxhdpi (144x144)
+- xxxhdpi (192x192)
+- Play Store (512x512)
+
+## 🔧 Core Technologies
+
+- **HTML5 Canvas API** - Image processing and scaling
+- **JSZip** - ZIP file packaging
+- **Cropper.js** - Professional image cropping library
+- **Native JavaScript** - No framework dependencies
+- **CSS3** - Modern UI design
+
+## 🎯 Core Logic Reusability
+
+The core modules (`core/` directory) are designed modularly for easy reuse in other scenarios:
+
+### Usage in Tampermonkey Scripts
+
+```javascript
+// Import core modules
+// @require file:///path/to/core/icon-sizes.js
+// @require file:///path/to/core/canvas-processor.js
+// @require file:///path/to/core/utils.js
+
+// Use core functionality
+const icons = await window.IconProcessor.generateIcons(imageFile, 'chrome');
+const zipBlob = await window.IconUtils.createZipPackage(icons, 'chrome');
+```
+
+### Usage in Chrome Extensions
+
+```javascript
+// Include in manifest.json
+{
+  "background": {
+    "scripts": [
+      "core/icon-sizes.js",
+      "core/canvas-processor.js",
+      "core/utils.js"
+    ]
+  }
+}
+
+// Use in extension code
+const icons = await IconProcessor.generateIcons(imageFile, 'ios');
+```
+
+## 📝 API Documentation
+
+### IconProcessor.generateIcons()
+
+Generates all icon sizes for a specified platform.
+
+```javascript
+/**
+ * @param {File|string} imageSource - Image file or data URL
+ * @param {string} platform - Platform name ('chrome', 'ios', 'android')
+ * @param {Function} progressCallback - Progress callback (current, total)
+ * @returns {Promise<Array>} Array of icon data
+ */
+const icons = await IconProcessor.generateIcons(file, 'chrome', (current, total) => {
+  console.log(`Progress: ${current}/${total}`);
+});
+```
+
+### IconUtils.createZipPackage()
+
+Creates a ZIP archive.
+
+```javascript
+/**
+ * @param {Array} icons - Array of icon data
+ * @param {string} platform - Platform name
+ * @returns {Promise<Blob>} Blob object of the ZIP file
+ */
+const zipBlob = await IconUtils.createZipPackage(icons, 'ios');
+```
+
+### IconUtils.downloadFile()
+
+Triggers file download.
+
+```javascript
+/**
+ * @param {Blob} blob - File Blob object
+ * @param {string} filename - Filename
+ */
+IconUtils.downloadFile(zipBlob, 'icons.zip');
+```
+
+## 🎨 Design Philosophy
+
+1. **Minimalism** - Clean interface, intuitive operation
+2. **Modularity** - Separation of core logic and UI for easy reuse
+3. **No Dependencies** - No dependencies except JSZip
+4. **Pure Frontend** - All processing done in the browser for privacy protection
+
+## 🔮 Future Plans
+
+- [x] Develop Tampermonkey script version
+- [x] Develop Chrome extension version
+- [ ] Support batch processing
+- [ ] Add icon preview functionality
+- [ ] Support custom sizes
+- [ ] Add icon optimization options
+- [ ] Publish to Chrome Web Store
+- [ ] Support more platforms (e.g., macOS, Windows)
+
+## 📄 License
+
+MIT License
+
+## 🤝 Contribution
+
+Issues and Pull Requests are welcome!
+
+## 📧 Contact
+
+If you have any questions or suggestions, please submit an Issue.

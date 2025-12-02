@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,8 +12,9 @@
     <div class="message-container" id="messageContainer"></div>
 
     <header>
+      <div class="lang-switcher"></div>
       <h1>Icon Gen</h1>
-      <p class="subtitle">优雅的多平台图标生成工具</p>
+      <p class="subtitle" data-i18n="subtitle">优雅的多平台图标生成工具</p>
     </header>
 
     <main>
@@ -21,12 +22,12 @@
       <section class="upload-section" id="uploadSection">
         <div class="upload-area" id="uploadArea">
           <span class="upload-icon">📁</span>
-          <span class="upload-text">点击上传图片</span>
-          <span class="upload-hint">支持 PNG, JPG, GIF, WebP</span>
+          <span class="upload-text" data-i18n="upload_title">点击上传图片</span>
+          <span class="upload-hint" data-i18n="upload_hint">支持 PNG, JPG, GIF, WebP</span>
           <input type="file" id="fileInput" accept="image/*" hidden>
         </div>
         
-        <button class="paste-btn" id="pasteBtn">📋 从剪贴板粘贴</button>
+        <button class="paste-btn" id="pasteBtn" data-i18n="paste">📋 从剪贴板粘贴</button>
       </section>
 
       <!-- 工作区（默认隐藏） -->
@@ -41,20 +42,20 @@
           </div>
           <div class="file-info">
             <span class="filename" id="filename">image.png</span>
-            <button class="reupload-btn" id="reuploadBtn">重新上传</button>
+            <button class="reupload-btn" id="reuploadBtn" data-i18n="reupload">重新上传</button>
           </div>
         </section>
 
         <!-- 平台选择 -->
         <section class="platform-section">
-          <h3 class="section-title">选择目标平台</h3>
+          <h3 class="section-title" data-i18n="platform_title">选择目标平台</h3>
           <div class="platform-options">
             <label class="platform-option">
               <input type="radio" name="platform" value="chrome" checked>
               <div class="platform-card">
                 <div class="platform-icon">🌐</div>
                 <span class="platform-name">Chrome</span>
-                <span class="platform-desc">Extension</span>
+                <span class="platform-desc" data-i18n="chrome_desc">Extension</span>
               </div>
             </label>
             
@@ -63,7 +64,7 @@
               <div class="platform-card">
                 <div class="platform-icon">🍎</div>
                 <span class="platform-name">iOS</span>
-                <span class="platform-desc">App Icon</span>
+                <span class="platform-desc" data-i18n="ios_desc">App Icon</span>
               </div>
             </label>
             
@@ -72,7 +73,7 @@
               <div class="platform-card">
                 <div class="platform-icon">🤖</div>
                 <span class="platform-name">Android</span>
-                <span class="platform-desc">App Icon</span>
+                <span class="platform-desc" data-i18n="android_desc">App Icon</span>
               </div>
             </label>
           </div>
@@ -81,7 +82,7 @@
         <!-- 生成按钮 -->
         <section class="action-section">
           <button class="generate-btn" id="generateBtn">
-            🚀 开始生成
+            🚀 <span data-i18n="generate">开始生成</span>
           </button>
           
           <div id="progressContainer" style="display: none;">
@@ -98,6 +99,9 @@
   <!-- 引入本地依赖库 -->
   <script src="lib/jszip.min.js"></script>
   <script src="lib/cropper.min.js"></script>
+  
+  <!-- 引入i18n模块 -->
+  <script src="core/i18n.js"></script>
   
   <!-- 引入核心模块 -->
   <script src="core/icon-sizes.js"></script>

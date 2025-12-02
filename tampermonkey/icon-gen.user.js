@@ -12,6 +12,148 @@
 // @run-at       document-end
 // ==/UserScript==
 
+/**
+ * I18n support for Icon Generator Tampermonkey Script
+ */
+
+// Language Resources (shared with website & extension)
+const LOCALES = {
+  zh: {
+    upload_title: '点击或拖拽图片至此',
+    upload_hint: '支持 PNG, JPG, GIF, WebP (最大 10MB)',
+    paste: '从剪贴板粘贴',
+    platform_title: '选择目标平台',
+    generate: '开始生成',
+    generating: '生成中...',
+    packing: '正在打包...',
+    success: (size) => `成功! 文件大小: ${size}`,
+    invalid_file: '无效的图片文件或文件过大（最大10MB）',
+    paste_error: '无法访问剪贴板',
+    no_image: '剪贴板中没有图像',
+    remove: '移除',
+    reupload: '重新上传',
+    chrome_desc: 'Extension',
+    ios_desc: 'App Icon',
+    android_desc: 'App Icon',
+    close: '×'
+  },
+  en: {
+    upload_title: 'Click or drag image here',
+    upload_hint: 'Supports PNG, JPG, GIF, WebP (Max 10MB)',
+    paste: 'Paste from clipboard',
+    platform_title: 'Choose target platform',
+    generate: 'Generate Icons',
+    generating: 'Generating...',
+    packing: 'Packaging...',
+    success: (size) => `Done! File size: ${size}`,
+    invalid_file: 'Invalid image or file exceeds 10MB',
+    paste_error: 'Cannot access clipboard',
+    no_image: 'Clipboard contains no image',
+    remove: 'Remove',
+    reupload: 'Re-upload',
+    chrome_desc: 'Extension',
+    ios_desc: 'App Icon',
+    android_desc: 'App Icon',
+    close: '×'
+  }
+};
+
+// Global State
+let currentLanguage = 'zh';
+
+// Initialize I18n
+function initI18n() {
+  // Detect language
+  const savedLang = GM_getValue ? GM_getValue('iconGenLang') : localStorage.getItem('iconGenLang');
+  if (savedLang && (savedLang === 'zh' || savedLang === 'en')) {
+    currentLanguage = savedLang;
+  } else {
+    const browserLang = navigator.language || navigator.languages[0];
+    currentLanguage = browserLang.startsWith('zh') ? 'zh' : 'en';
+  }
+  
+  // Apply translations
+  applyTranslations();
+}
+
+// Set Language
+function setLanguage(lang) {
+  if (lang !== 'zh' && lang !== 'en') return;
+  currentLanguage = lang;
+  
+  if (GM_setValue) {
+    GM_setValue('iconGenLang', lang);
+  } else {
+    localStorage.setItem('iconGenLang', lang);
+  }
+  
+  applyTranslations();
+}
+
+// Get Current Language
+function getLanguage() {
+  return currentLanguage;
+}
+
+// Translate Key
+function t(key, ...args) {
+  const locale = LOCALES[currentLanguage];
+  if (!locale) return key;
+  
+  const value = locale[key];
+  if (typeof value === 'function') {
+    return value(...args);
+  }
+  return value || key;
+}
+
+// Apply Translations to DOM
+function applyTranslations() {
+  // Update all elements with data-i18n attributes
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (key) {
+      el.textContent = t(key);
+    }
+  });
+  
+  // Update elements with data-i18n-attr attributes
+  document.querySelectorAll('[data-i18n-attr]').forEach(el => {
+    const attr = el.getAttribute('data-i18n-attr');
+    const key = el.getAttribute('data-i18n');
+    if (attr && key) {
+      el.setAttribute(attr, t(key));
+    }
+  });
+  
+  // Update language switcher button states
+  const langButtons = document.querySelectorAll('#icon-gen-lang-switcher button');
+  langButtons.forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.dataset.lang === currentLanguage) {
+      btn.classList.add('active');
+    }
+  });
+}
+
+// Setup Language Switcher
+function setupLanguageSwitcher() {
+  const switcher = document.getElementById('icon-gen-lang-switcher');
+  if (!switcher) return;
+  
+  switcher.innerHTML = `
+    <button class="ig-lang-btn" data-lang="zh">中文</button>
+    <button class="ig-lang-btn" data-lang="en">English</button>
+  `;
+  
+  switcher.addEventListener('click', (e) => {
+    if (e.target.classList.contains('ig-lang-btn')) {
+      const lang = e.target.dataset.lang;
+      setLanguage(lang);
+    }
+  });
+}
+
 (function() {
     'use strict';
 
@@ -583,6 +725,7 @@
     `);
 
     // ==================== UI创建 ====================
+    // ==================== UI创建 ====================
     function createUI() {
         const overlay = document.createElement('div');
         overlay.id = 'icon-gen-overlay';
@@ -592,18 +735,19 @@
                 <div id="icon-gen-message"></div>
                 
                 <div class="ig-header">
+                    <div id="icon-gen-lang-switcher" style="position: absolute; top: 0; right: 0;"></div>
                     <h2>Icon Gen</h2>
-                    <p>优雅的多平台图标生成工具</p>
-                    <button id="icon-gen-close">×</button>
+                    <p class="subtitle" data-i18n="subtitle">优雅的多平台图标生成工具</p>
+                    <button id="icon-gen-close" data-i18n="close">×</button>
                 </div>
 
                 <!-- Upload Area -->
                 <div id="icon-gen-upload-area">
                     <span class="ig-upload-icon">📁</span>
-                    <span class="ig-upload-title">点击或拖拽图片至此</span>
-                    <p class="ig-upload-desc">支持 PNG, JPG, GIF, WebP (Max 10MB)</p>
+                    <span class="ig-upload-title" data-i18n="upload_title">点击或拖拽图片至此</span>
+                    <p class="ig-upload-desc" data-i18n="upload_hint">支持 PNG, JPG, GIF, WebP (Max 10MB)</p>
                     <input type="file" id="icon-gen-file-input" accept="image/*" style="display: none;">
-                    <button class="ig-btn ig-btn-secondary" id="icon-gen-paste-btn" style="margin-top: 20px; width: auto; padding: 8px 16px; font-size: 0.9rem;">
+                    <button class="ig-btn ig-btn-secondary" id="icon-gen-paste-btn" data-i18n="paste" style="margin-top: 20px; width: auto; padding: 8px 16px; font-size: 0.9rem;">
                         📋 从剪贴板粘贴
                     </button>
                 </div>
@@ -618,19 +762,19 @@
                         </div>
                         <div class="ig-file-info">
                             <span class="ig-filename" id="icon-gen-filename">image.png</span>
-                            <button class="ig-reupload-btn" id="icon-gen-reupload-btn">重新上传</button>
+                            <button class="ig-reupload-btn" id="icon-gen-reupload-btn" data-i18n="reupload">重新上传</button>
                         </div>
                     </div>
 
                     <!-- Platform Selection -->
-                    <h3 class="ig-section-title">选择目标平台</h3>
+                    <h3 class="ig-section-title" data-i18n="platform_title">选择目标平台</h3>
                     <div class="ig-platform-grid">
                         <label class="ig-platform-option">
                             <input type="radio" name="icon-gen-platform" value="chrome" checked>
                             <div class="ig-platform-card">
                                 <span class="ig-platform-icon">🌐</span>
                                 <span class="ig-platform-name">Chrome</span>
-                                <span class="ig-platform-desc">Extension</span>
+                                <span class="ig-platform-desc" data-i18n="chrome_desc">Extension</span>
                             </div>
                         </label>
                         
@@ -639,7 +783,7 @@
                             <div class="ig-platform-card">
                                 <span class="ig-platform-icon">🍎</span>
                                 <span class="ig-platform-name">iOS</span>
-                                <span class="ig-platform-desc">App Icon</span>
+                                <span class="ig-platform-desc" data-i18n="ios_desc">App Icon</span>
                             </div>
                         </label>
                         
@@ -648,14 +792,14 @@
                             <div class="ig-platform-card">
                                 <span class="ig-platform-icon">🤖</span>
                                 <span class="ig-platform-name">Android</span>
-                                <span class="ig-platform-desc">App Icon</span>
+                                <span class="ig-platform-desc" data-i18n="android_desc">App Icon</span>
                             </div>
                         </label>
                     </div>
 
                     <!-- Action -->
                     <button class="ig-btn ig-btn-primary" id="icon-gen-generate-btn">
-                        🚀 开始生成
+                        <span data-i18n="generate">🚀 开始生成</span>
                     </button>
 
                     <!-- Progress -->
@@ -670,7 +814,6 @@
         document.body.appendChild(overlay);
         return overlay;
     }
-
     // ==================== UI交互逻辑 ====================
     let currentImageFile = null;
     let currentPlatform = 'chrome';
@@ -726,7 +869,7 @@
 
     function processImageFile(file) {
         if (!validateImageFile(file)) {
-            showMessage('无效的图片文件或文件过大（最大10MB）', 'error');
+            showMessage(t('invalid_file'), 'error');
             return;
         }
         
@@ -760,14 +903,15 @@
 
     async function handleGenerate() {
         if (!currentImageFile) {
-            showMessage('请先上传图片', 'error');
+            showMessage(t('invalid_file'), 'error');
             return;
         }
         
         try {
             const generateBtn = document.getElementById('icon-gen-generate-btn');
+            const btnText = generateBtn.querySelector('span') || generateBtn;
             generateBtn.disabled = true;
-            generateBtn.textContent = '⏳ 生成中...';
+            btnText.textContent = '⏳ ' + t('generating');
             
             const progressBar = document.getElementById('icon-gen-progress');
             const progressText = document.getElementById('icon-gen-progress-text');
@@ -787,7 +931,7 @@
             const icons = await generateIcons(sourceImage, currentPlatform, updateProgress);
             
             updateProgress(icons.length, icons.length);
-            progressText.textContent = '正在打包...';
+            progressText.textContent = t('packing');
             
             const zipBlob = await createZipPackage(icons, currentPlatform);
             
@@ -795,7 +939,7 @@
             downloadFile(zipBlob, filename);
             
             showMessage(
-                `成功生成 ${icons.length} 个图标！文件大小: ${formatFileSize(zipBlob.size)}`,
+                t('success', formatFileSize(zipBlob.size)),
                 'success'
             );
             
@@ -803,18 +947,19 @@
                 progressBar.style.display = 'none';
                 progressText.style.display = 'none';
                 generateBtn.disabled = false;
-                generateBtn.textContent = '🚀 开始生成';
+                btnText.textContent = '🚀 ' + t('generate');
             }, 1000);
             
         } catch (error) {
             console.error('生成失败:', error);
-            showMessage('生成失败: ' + error.message, 'error');
+            showMessage(t('paste_error') + ': ' + error.message, 'error');
             
             const progressBar = document.getElementById('icon-gen-progress');
             const generateBtn = document.getElementById('icon-gen-generate-btn');
+            const btnText = generateBtn.querySelector('span') || generateBtn;
             progressBar.style.display = 'none';
             generateBtn.disabled = false;
-            generateBtn.textContent = '🚀 开始生成';
+            btnText.textContent = '🚀 ' + t('generate');
         }
     }
 
@@ -868,7 +1013,7 @@
                 const file = await pasteImageFromClipboard();
                 processImageFile(file);
             } catch (error) {
-                showMessage(error.message, 'error');
+                showMessage(t('paste_error') + ': ' + error.message, 'error');
             }
         });
         
@@ -900,9 +1045,15 @@
     }
 
     // ==================== 初始化 ====================
-    function init() {
+    async function init() {
+        // Initialize i18n first
+        initI18n();
+        
         overlay = createUI();
         setupEventListeners();
+        
+        // Setup language switcher after UI creation
+        setupLanguageSwitcher();
         
         // 注册菜单命令
         GM_registerMenuCommand('Open Icon Generator', () => {
